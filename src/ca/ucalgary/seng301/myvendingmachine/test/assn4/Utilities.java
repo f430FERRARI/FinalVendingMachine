@@ -132,7 +132,7 @@ public class Utilities {
 	    ProductRack pcr = vm.getProductRack(i);
 	    String name = vm.getProductKindName(i);
 	    for(int products = 0; products < productCount; products++)
-		pcr.loadWithoutEvents(new Product(name));
+		pcr.loadWithoutEvents(new Product(name));  //TODO: Beware of loadwithoutevents
 
 	    i++;
 	}
@@ -161,7 +161,7 @@ public class Utilities {
 			CoinRack cr = vm.getCoinRack(i);
 			int value = vm.getCoinKindForRack(i);
 			for (int coins = 0; coins < coinCount; coins++)
-				cr.loadWithoutEvents(new Coin(value));
+				cr.loadWithoutEvents(new Coin(value));  //TODO: Beware of loadwithoutevents
 
 			i++;
 		}
