@@ -4,15 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.ucalgary.seng301.vendingmachine.Coin;
-import ca.ucalgary.seng301.vendingmachine.PopCan;
+import ca.ucalgary.seng301.vendingmachine.Product;
 import ca.ucalgary.seng301.vendingmachine.hardware.CoinRack;
+import ca.ucalgary.seng301.vendingmachine.hardware.ProductRack;
+import ca.ucalgary.seng301.vendingmachine.hardware.SimulationException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
 public class Utilities {
     /**
      * A convenience method for checking the contents of the delivery chute
      * against an expected list. The list should contain one String per expected
-     * pop (its name) and zero or more positive Integers, in any order. The
+     * product (its name) and zero or more positive Integers, in any order. The
      * Integers are added together and compared to the total value of coins in
      * the delivery chute. Empties the chute.
      * 
@@ -26,8 +28,8 @@ public class Utilities {
 	List<Object> actualList = new ArrayList<>();
 
 	for(Object obj : actualItems) {
-	    if(obj instanceof PopCan) {
-		PopCan pc = (PopCan)obj;
+	    if(obj instanceof Product) {
+		Product pc = (Product)obj;
 		String name = pc.getName();
 		actualList.add(name);
 	    }
@@ -83,28 +85,85 @@ public class Utilities {
     }
 
     /**
-     * Convenience method for checking the contents of pop racks. Empties the
-     * pop racks.
+     * Convenience method for checking the contents of product racks. Empties the
+     * product racks.
      *
      * @param expectedList
-     *            The names of the pops expected to be present. Can be an empty
+     *            The names of the products expected to be present. Can be an empty
      *            list. The same string can be repeated as necessary. The order
      *            is not significant.
-     * @return true if the actual pops have the exactly the same names as the
+     * @return true if the actual products have the exactly the same names as the
      *         expected ones else false
      */
-    public static List<String> extractAndSortFromPopRacks(VendingMachine vm) {
-	List<PopCan> actualPopCans = new ArrayList<>();
-	for(int i = 0, max = vm.getNumberOfPopCanRacks(); i < max; i++)
-	    actualPopCans.addAll(vm.getPopCanRack(i).unloadWithoutEvents());
+    public static List<String> extractAndSortFromProductRacks(VendingMachine vm) {
+	List<Product> actualProducts = new ArrayList<>();
+	for(int i = 0, max = vm.getNumberOfProductRacks(); i < max; i++)
+	    actualProducts.addAll(vm.getProductRack(i).unloadWithoutEvents());
 
 	List<String> actualList = new ArrayList<>();
-	for(PopCan popCan : actualPopCans)
-	    actualList.add(popCan.getName());
+	for(Product productCan : actualProducts)
+	    actualList.add(productCan.getName());
 
 	actualList.sort(null);
 
 	return actualList;
     }
 
+    /**
+     * A convenience method for constructing and loading a set of product cans into
+     * the machine.
+     * 
+     * @param productCounts
+     *            A variadic list of ints each representing the number of products
+     *            to create and load into the corresponding rack.
+     * @throws SimulationException
+     *             If the number of arguments is different than the number of
+     *             racks, or if any of the counts are negative.
+     */
+    public static void loadProducts(VendingMachine vm, int... productCounts) {
+	if(productCounts.length != vm.getNumberOfProductRacks())
+	    throw new SimulationException("Product counts have to equal number of racks");
+
+	int i = 0;
+	for(int productCount : productCounts) {
+	    if(productCount < 0)
+		throw new SimulationException("Each count must not be negative");
+
+	    ProductRack pcr = vm.getProductRack(i);
+	    String name = vm.getProductKindName(i);
+	    for(int products = 0; products < productCount; products++)
+		pcr.loadWithoutEvents(new Product(name));
+
+	    i++;
+	}
+    }
+
+    /**
+     * A convenience method for constructing and loading a set of coins into the
+     * machine.
+     * 
+     * @param coinCounts
+     *            A variadic list of ints each representing the number of coins
+     *            to create and load into the corresponding rack.
+     * @throws SimulationException
+     *             If the number of arguments is different than the number of
+     *             racks, or if any of the counts are negative.
+     */
+	public static void loadCoins(VendingMachine vm, int... coinCounts) {
+		if (coinCounts.length != vm.getNumberOfCoinRacks())
+			throw new SimulationException("Coin counts have to equal number of racks");
+
+		int i = 0;
+		for (int coinCount : coinCounts) {
+			if (coinCount < 0)
+				throw new SimulationException("Each count must not be negative");
+
+			CoinRack cr = vm.getCoinRack(i);
+			int value = vm.getCoinKindForRack(i);
+			for (int coins = 0; coins < coinCount; coins++)
+				cr.loadWithoutEvents(new Coin(value));
+
+			i++;
+		}
+	}
 }
