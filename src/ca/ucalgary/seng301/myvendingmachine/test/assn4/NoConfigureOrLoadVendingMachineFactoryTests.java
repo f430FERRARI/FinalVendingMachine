@@ -10,7 +10,7 @@ import org.junit.Test;
 import ca.ucalgary.seng301.myvendingmachine.VendingMachineLogic;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
-public class NoConfigureOrLoadVendingMachineFactoryTests extends WRAPPER {
+public class NoConfigureOrLoadVendingMachineFactoryTests {
 	private VendingMachine vm;
 
 	@Before

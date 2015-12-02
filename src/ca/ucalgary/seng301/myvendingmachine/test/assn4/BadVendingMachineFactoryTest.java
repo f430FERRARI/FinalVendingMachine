@@ -10,7 +10,7 @@ import ca.ucalgary.seng301.myvendingmachine.VendingMachineLogic;
 import ca.ucalgary.seng301.vendingmachine.hardware.SimulationException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
-public class BadVendingMachineFactoryTest extends WRAPPER {
+public class BadVendingMachineFactoryTest {
 	private VendingMachine vm;
 
 	@Before

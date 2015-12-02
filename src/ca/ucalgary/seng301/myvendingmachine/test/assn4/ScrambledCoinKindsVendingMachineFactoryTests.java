@@ -12,7 +12,7 @@ import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
-public class ScrambledCoinKindsVendingMachineFactoryTests extends WRAPPER {
+public class ScrambledCoinKindsVendingMachineFactoryTests {
 	private VendingMachine vm;
 
 	@Before
