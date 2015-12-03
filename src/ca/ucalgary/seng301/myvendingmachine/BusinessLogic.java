@@ -10,38 +10,36 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
-import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardware;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardwareListener;
+import ca.ucalgary.seng301.vendingmachine.hardware.Button;
+import ca.ucalgary.seng301.vendingmachine.hardware.ButtonListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.CapacityExceededException;
 import ca.ucalgary.seng301.vendingmachine.hardware.CoinRack;
-import ca.ucalgary.seng301.vendingmachine.hardware.CoinSlot;
-import ca.ucalgary.seng301.vendingmachine.hardware.CoinSlotListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
 import ca.ucalgary.seng301.vendingmachine.hardware.Display;
 import ca.ucalgary.seng301.vendingmachine.hardware.EmptyException;
 import ca.ucalgary.seng301.vendingmachine.hardware.ProductRack;
-import ca.ucalgary.seng301.vendingmachine.hardware.Button;
-import ca.ucalgary.seng301.vendingmachine.hardware.ButtonListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.SimulationException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
-public class VendingMachineLogic implements CoinSlotListener, ButtonListener {
-	private int availableFunds = 0;
+public class BusinessLogic implements ButtonListener, ProductSelectionListener {
+	
 	private VendingMachine vendingMachine;
+	private FundsAvailable funds;
 	private Map<Button, Integer> buttonToIndex = new HashMap<>();
 	private Map<Integer, Integer> valueToIndexMap = new HashMap<>();
 
-	public VendingMachineLogic(VendingMachine vm) {
+	public BusinessLogic(VendingMachine vm) {
 		vendingMachine = vm;
-
-		vm.getCoinSlot().register(this);
-		for (int i = 0; i < vm.getNumberOfSelectionButtons(); i++) {
-			Button sb = vm.getSelectionButton(i);
-			sb.register(this);
-			buttonToIndex.put(sb, i);
+		funds = new FundsAvailable();
+		funds.registerPaymentMethod(vm);
+		for(int i = 0; i < vm.getNumberOfSelectionButtons(); i++) {
+		    Button sb = vm.getSelectionButton(i);
+		    sb.register(this);
+		    buttonToIndex.put(sb, i);
 		}
-
+		
 		for (int i = 0; i < vm.getNumberOfCoinRacks(); i++) {
 			int value = vm.getCoinKindForRack(i);
 			valueToIndexMap.put(value, i);
@@ -57,16 +55,19 @@ public class VendingMachineLogic implements CoinSlotListener, ButtonListener {
 	}
 
 	@Override
-	public void validCoinInserted(CoinSlot coinSlotSimulator, Coin coin) {
-		availableFunds += coin.getValue();
-	}
-
-	@Override
-	public void coinRejected(CoinSlot coinSlotSimulator, Coin coin) {
-	}
-
-	@Override
 	public void pressed(Button button) {
+		
+		// Return button is pressed
+		if (button == vendingMachine.getReturnButton()) { 
+			try {
+				vendingMachine.getCoinReceptacle().returnCoins();
+			} catch (CapacityExceededException | DisabledException e) {	
+				throw new SimulationException(e);
+			}
+		}
+		
+		// Button is selected for product
+		
 		Integer index = buttonToIndex.get(button);
 
 		if (index == null)
@@ -74,20 +75,20 @@ public class VendingMachineLogic implements CoinSlotListener, ButtonListener {
 
 		int cost = vendingMachine.getProductKindCost(index);
 
-		if (cost <= availableFunds) {
-			ProductRack pcr = vendingMachine.getProductRack(index);
-			if (pcr.size() > 0) {
+		if (cost <= funds.getFunds()) {
+			ProductRack productRack = vendingMachine.getProductRack(index);
+			if (productRack.size() > 0) {
 				try {
-					pcr.dispenseProduct();
+					productRack.dispenseProduct();
 					vendingMachine.getCoinReceptacle().storeCoins();
-					availableFunds = deliverChange(cost, availableFunds);
+					deliverChange(cost);
 				} catch (DisabledException | EmptyException | CapacityExceededException e) {
 					throw new SimulationException(e);
 				}
 			}
 		} else {
 			Display disp = vendingMachine.getDisplay();
-			disp.display("Cost: " + cost + "; available funds: " + availableFunds);
+			disp.display("Cost: " + cost + "; available funds: " + funds.getFunds());
 			final Timer timer = new Timer();
 			timer.schedule(new TimerTask() {
 				@Override
@@ -141,10 +142,11 @@ public class VendingMachineLogic implements CoinSlotListener, ButtonListener {
 		return newMap;
 	}
 
-	private int deliverChange(int cost, int entered)
+	private int deliverChange(int cost)
 			throws CapacityExceededException, EmptyException, DisabledException {
-		int changeDue = entered - cost;
-
+		int changeDue = funds.getFunds() - cost;
+		funds.removeFunds(cost);
+		
 		if (changeDue < 0)
 			throw new InternalError("Cost was greater than entered, which should not happen");
 
@@ -170,10 +172,34 @@ public class VendingMachineLogic implements CoinSlotListener, ButtonListener {
 		for (Integer ck : res) {
 			CoinRack cr = vendingMachine.getCoinRack(ck);
 			cr.releaseCoin();
-			changeDue -= vendingMachine.getCoinKindForRack(ck);
+			funds.removeFunds(vendingMachine.getCoinKindForRack(ck));
 		}
 
 		return changeDue;
+	}
+
+	@Override
+	public void insufficientFunds() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void outOfStock() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dispensed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void hardwareFailure() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

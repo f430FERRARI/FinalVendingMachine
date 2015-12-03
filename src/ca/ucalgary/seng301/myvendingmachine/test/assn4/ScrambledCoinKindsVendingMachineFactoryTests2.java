@@ -7,7 +7,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.ucalgary.seng301.myvendingmachine.VendingMachineLogic;
+import ca.ucalgary.seng301.myvendingmachine.BusinessLogic;
 import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
@@ -21,7 +21,7 @@ public class ScrambledCoinKindsVendingMachineFactoryTests2 {
 		// configure("Coke", "water", "stuff"; 250, 250, 205)
 		// load(0, 1, 2, 1; 1, 1, 1)
 		vm = new VendingMachine(new int[] { 100, 5, 25, 10 }, 3, 10, 10, 10);
-		new VendingMachineLogic(vm);
+		new BusinessLogic(vm);
 
 		vm.configure(Arrays.asList("Coke", "water", "stuff"), Arrays.asList(250, 250, 205));
 		Utilities.loadCoins(vm, 0, 1, 2, 1);
@@ -82,7 +82,7 @@ public class ScrambledCoinKindsVendingMachineFactoryTests2 {
 		assertEquals(Arrays.asList("stuff", "water"), Utilities.extractAndSortFromProductRacks(vm));
 
 		vm = new VendingMachine(new int[] { 100, 5, 25, 10 }, 3, 10, 10, 10);
-		new VendingMachineLogic(vm);
+		new BusinessLogic(vm);
 		vm.configure(Arrays.asList("Coke", "water", "stuff"), Arrays.<Integer> asList(250, 250, 205));
 		vm.configure(Arrays.asList("A", "B", "C"), Arrays.<Integer> asList(5, 10, 25));
 		assertEquals(0, Utilities.extractAndSumFromCoinRacks(vm));

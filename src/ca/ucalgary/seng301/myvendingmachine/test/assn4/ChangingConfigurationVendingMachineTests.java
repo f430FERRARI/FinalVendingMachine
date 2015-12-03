@@ -7,7 +7,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.ucalgary.seng301.myvendingmachine.VendingMachineLogic;
+import ca.ucalgary.seng301.myvendingmachine.BusinessLogic;
 import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
@@ -22,7 +22,7 @@ public class ChangingConfigurationVendingMachineTests {
 		// load(1, 1, 2, 0; 1, 1, 1)
 
 		vm = new VendingMachine(new int[] { 5, 10, 25, 100 }, 3, 10, 10, 10);
-		new VendingMachineLogic(vm);
+		new BusinessLogic(vm);
 
 		vm.configure(Arrays.asList("A", "B", "C"), Arrays.asList(10, 10, 10));
 		Utilities.loadCoins(vm, 1, 1, 2, 0);

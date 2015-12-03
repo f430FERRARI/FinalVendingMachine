@@ -1,6 +1,8 @@
 package ca.ucalgary.seng301.myvendingmachine;
 
-public interface FundsAvailableListener {
+import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardwareListener;
+
+public interface FundsAvailableListener extends AbstractHardwareListener{
 	
 	public void fundsAdded(int amount); 
 	

@@ -7,7 +7,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.ucalgary.seng301.myvendingmachine.VendingMachineLogic;
+import ca.ucalgary.seng301.myvendingmachine.BusinessLogic;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
 public class NoConfigureOrLoadVendingMachineFactoryTests {
@@ -17,7 +17,7 @@ public class NoConfigureOrLoadVendingMachineFactoryTests {
 	public void setup() {
 		// construct(5, 10, 25, 100; 3; 10; 10; 10)
 		vm = new VendingMachine(new int[] { 5, 10, 25, 100 }, 3, 10, 10, 10);
-		new VendingMachineLogic(vm);
+		new BusinessLogic(vm);
 	}
 
 	@Test

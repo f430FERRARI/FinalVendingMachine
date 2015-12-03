@@ -1,5 +1,8 @@
 package ca.ucalgary.seng301.myvendingmachine;
 
+import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardware;
+import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardwareListener;
+
 //Associated with display, and funds availible
 public class NotificationManager implements FundsAvailableListener, ProductSelectionListener {
 
@@ -42,6 +45,18 @@ public class NotificationManager implements FundsAvailableListener, ProductSelec
 
 	@Override
 	public void dispensed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void enabled(AbstractHardware<AbstractHardwareListener> hardware) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void disabled(AbstractHardware<AbstractHardwareListener> hardware) {
 		// TODO Auto-generated method stub
 		
 	}
