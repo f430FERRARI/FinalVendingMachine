@@ -1,46 +1,78 @@
 package ca.ucalgary.seng301.myvendingmachine;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardware;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardwareListener;
+import ca.ucalgary.seng301.vendingmachine.hardware.Display;
+import ca.ucalgary.seng301.vendingmachine.hardware.IndicatorLight;
 
-//Associated with display, and funds availible
+//Associated with display, and funds available
 public class NotificationManager implements FundsAvailableListener, ProductSelectionListener {
 
+	Display display;
+	IndicatorLight outOfOrderLight; 
+	IndicatorLight exactChangeLight;
+	
+	public NotificationManager(Display d, IndicatorLight oOL, IndicatorLight eCL) {
+		display = d; 
+		outOfOrderLight = oOL; 
+		exactChangeLight = eCL;
+	}
 
+	private void timedNotification(int ms, String oldMsg, String newMsg) {
+		display.display(newMsg); 
+		final Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				timer.cancel();
+			}
+		}, ms); 
+		display.display(oldMsg);
+	}
+	
 	@Override
 	public void fundsAdded(int amount) {
-		// TODO Auto-generated method stub
-		
+		display.display("Total: " + FundsAvailable.getInstance().getFunds() + " units");
 	}
 
 	@Override
 	public void fundsRemoved(int amount) {
-		// TODO Auto-generated method stub
-		
+		display.display("Total: " + FundsAvailable.getInstance().getFunds() + " units"); 
 	}
 
 	@Override
-	public void fundsReturned() {
-		// TODO Auto-generated method stub
-		
+	public void fundsReturned() { 
+		String oldMsg = display.read();
+		String newMsg = "Funds returned";
+		timedNotification(2000, oldMsg, newMsg);
 	}
 
+	//Activate out of order light 
+	//Notify IndicatorLightListeners that it has been activated 
+	//TODO: Deactivate this light
 	@Override
 	public void hardwareFailure() {
-		// TODO Auto-generated method stub
-		
+		outOfOrderLight.activate(); 
 	}
 
 	@Override
-	public void insufficientFunds() {
-		// TODO Auto-generated method stub
-		
+	public void insufficientFunds(int cost) { 
+		String oldMsg = display.read();
+		String newMsg = "Cost is " + cost; 
+		timedNotification(5000, oldMsg, newMsg);;
 	}
 
+	//TODO: Deactivate this light
+	@Override
+	public void exactChange() {
+		exactChangeLight.activate();
+	} 
+	
 	@Override
 	public void outOfStock() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -60,5 +92,7 @@ public class NotificationManager implements FundsAvailableListener, ProductSelec
 		// TODO Auto-generated method stub
 		
 	}
+
+	
 
 }

@@ -9,11 +9,20 @@ import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
 public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 
-	private ArrayList<FundsAvailable> paymentMethods = new ArrayList<FundsAvailable>();
+	private static FundsAvailable instance = new FundsAvailable();
+	
+	private ArrayList<FundsInterface> paymentMethods = new ArrayList<FundsInterface>();
 	private Vector<FundsAvailableListener> listeners = new Vector<FundsAvailableListener>();
-
+	//TODO: Register listeners
+	
+	private FundsAvailable() {} 
+	
+	public static FundsAvailable getInstance() {
+		return instance;
+	}
+	
 	public void removeFunds(int amount) {
-		for (FundsAvailable paymentMethod : paymentMethods) {
+		for (FundsInterface paymentMethod : paymentMethods) {
 			if (paymentMethod.getFunds() >= amount) {
 				paymentMethod.removeFunds(amount);
 				break;
@@ -32,21 +41,28 @@ public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 
 	public int getFunds() {
 		int availableFunds = 0;
-		for (FundsAvailable paymentMethod : paymentMethods) {
+		for (FundsInterface paymentMethod : paymentMethods) {
 			availableFunds += paymentMethod.getFunds();
 		}
 		return availableFunds;
 	} 
 	
-	public FundsAvailable getInstance() {
-		return this;
+	public void returnFunds() {
+		clearFunds();
+		notifyFundsReturned();
 	}
 	
 	public void addFunds(int amount) { 
 	} 
 
 	public void clearFunds() {
-		
+		for (FundsInterface paymentMethod : paymentMethods) {
+			paymentMethod.clearFunds(); 
+		} 
+	} 
+	
+	private boolean checkExactChange() {
+		return false; 
 	}
 	
 	protected void notifyFundsAdded(int amount) {

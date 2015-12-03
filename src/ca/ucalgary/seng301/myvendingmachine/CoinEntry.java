@@ -3,19 +3,24 @@ package ca.ucalgary.seng301.myvendingmachine;
 import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardware;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardwareListener;
+import ca.ucalgary.seng301.vendingmachine.hardware.CapacityExceededException;
 import ca.ucalgary.seng301.vendingmachine.hardware.CoinReceptacle;
 import ca.ucalgary.seng301.vendingmachine.hardware.CoinReceptacleListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.CoinSlot;
 import ca.ucalgary.seng301.vendingmachine.hardware.CoinSlotListener;
+import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
+import ca.ucalgary.seng301.vendingmachine.hardware.SimulationException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
 //MAY be missing methods, look at diagram  
 //Diagram says this class is supposed to be private 
-public class CoinEntry extends FundsAvailable implements CoinSlotListener, CoinReceptacleListener {
+public class CoinEntry implements CoinSlotListener, CoinReceptacleListener, FundsInterface {
 
 	private int cashFunds;
+	private VendingMachine vendingMachine;
 	
 	public CoinEntry(VendingMachine vm) {
+		vendingMachine = vm;
 		vm.getCoinSlot().register(this);
 	}
 
@@ -32,24 +37,29 @@ public class CoinEntry extends FundsAvailable implements CoinSlotListener, CoinR
 	@Override
 	public void addFunds(int amount) {
 		cashFunds += amount;  
-		super.notifyFundsAdded(amount);
+		FundsAvailable.getInstance().notifyFundsAdded(amount);
 	}
 
 	@Override
 	public void removeFunds(int amount) {
 		cashFunds -= amount; 
-		super.notifyFundsRemoved(amount);
+		FundsAvailable.getInstance().notifyFundsRemoved(amount);
 	} 
 	
-	@Override
-	public void coinsRemoved(CoinReceptacle receptacle) {
+	@Override 
+	public void returnFunds() { 
 		clearFunds(); 
-	}
+		try {
+			vendingMachine.getCoinReceptacle().returnCoins();
+		} catch (CapacityExceededException | DisabledException e) {
+			throw new SimulationException(e);
+		}	 	
+	};
 	
 	@Override
 	public void clearFunds() {
 		cashFunds = 0; 
-		super.notifyFundsRemoved(cashFunds);
+		FundsAvailable.getInstance().notifyFundsRemoved(cashFunds);
 	}  
 	
 	@Override
@@ -82,5 +92,8 @@ public class CoinEntry extends FundsAvailable implements CoinSlotListener, CoinR
 		
 	}
 
+	@Override
+	public void coinsRemoved(CoinReceptacle receptacle) {
+	}
 
 }

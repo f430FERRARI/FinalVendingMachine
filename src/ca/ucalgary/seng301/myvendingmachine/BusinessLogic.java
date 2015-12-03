@@ -6,9 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardware;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardwareListener;
@@ -23,23 +22,27 @@ import ca.ucalgary.seng301.vendingmachine.hardware.ProductRack;
 import ca.ucalgary.seng301.vendingmachine.hardware.SimulationException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
-public class BusinessLogic implements ButtonListener, ProductSelectionListener {
-	
+public class BusinessLogic extends AbstractHardware<ProductSelectionListener> implements ButtonListener {
+
+	private Vector<ProductSelectionListener> listeners = new Vector<ProductSelectionListener>();
+
 	private VendingMachine vendingMachine;
-	private FundsAvailable funds;
 	private Map<Button, Integer> buttonToIndex = new HashMap<>();
 	private Map<Integer, Integer> valueToIndexMap = new HashMap<>();
 
 	public BusinessLogic(VendingMachine vm) {
 		vendingMachine = vm;
-		funds = new FundsAvailable();
-		funds.registerPaymentMethod(vm);
-		for(int i = 0; i < vm.getNumberOfSelectionButtons(); i++) {
-		    Button sb = vm.getSelectionButton(i);
-		    sb.register(this);
-		    buttonToIndex.put(sb, i);
+		FundsAvailable.getInstance().registerPaymentMethod(vm);
+
+		Display display = vendingMachine.getDisplay(); // TODO: Instantiate
+														// somewhere else
+
+		for (int i = 0; i < vm.getNumberOfSelectionButtons(); i++) {
+			Button sb = vm.getSelectionButton(i);
+			sb.register(this);
+			buttonToIndex.put(sb, i);
 		}
-		
+
 		for (int i = 0; i < vm.getNumberOfCoinRacks(); i++) {
 			int value = vm.getCoinKindForRack(i);
 			valueToIndexMap.put(value, i);
@@ -56,18 +59,14 @@ public class BusinessLogic implements ButtonListener, ProductSelectionListener {
 
 	@Override
 	public void pressed(Button button) {
-		
+
 		// Return button is pressed
-		if (button == vendingMachine.getReturnButton()) { 
-			try {
-				vendingMachine.getCoinReceptacle().returnCoins();
-			} catch (CapacityExceededException | DisabledException e) {	
-				throw new SimulationException(e);
-			}
+		if (button == vendingMachine.getReturnButton()) {
+			FundsAvailable.getInstance().returnFunds();
 		}
-		
+
 		// Button is selected for product
-		
+
 		Integer index = buttonToIndex.get(button);
 
 		if (index == null)
@@ -75,7 +74,7 @@ public class BusinessLogic implements ButtonListener, ProductSelectionListener {
 
 		int cost = vendingMachine.getProductKindCost(index);
 
-		if (cost <= funds.getFunds()) {
+		if (cost <= FundsAvailable.getInstance().getFunds()) {
 			ProductRack productRack = vendingMachine.getProductRack(index);
 			if (productRack.size() > 0) {
 				try {
@@ -87,15 +86,7 @@ public class BusinessLogic implements ButtonListener, ProductSelectionListener {
 				}
 			}
 		} else {
-			Display disp = vendingMachine.getDisplay();
-			disp.display("Cost: " + cost + "; available funds: " + funds.getFunds());
-			final Timer timer = new Timer();
-			timer.schedule(new TimerTask() {
-				@Override
-				public void run() {
-					timer.cancel();
-				}
-			}, 5000);
+			notifyInsufficientFunds(cost);
 		}
 	}
 
@@ -142,11 +133,10 @@ public class BusinessLogic implements ButtonListener, ProductSelectionListener {
 		return newMap;
 	}
 
-	private int deliverChange(int cost)
-			throws CapacityExceededException, EmptyException, DisabledException {
-		int changeDue = funds.getFunds() - cost;
-		funds.removeFunds(cost);
-		
+	private int deliverChange(int cost) throws CapacityExceededException, EmptyException, DisabledException {
+		int changeDue = FundsAvailable.getInstance().getFunds() - cost;
+		FundsAvailable.getInstance().removeFunds(cost);
+
 		if (changeDue < 0)
 			throw new InternalError("Cost was greater than entered, which should not happen");
 
@@ -172,34 +162,16 @@ public class BusinessLogic implements ButtonListener, ProductSelectionListener {
 		for (Integer ck : res) {
 			CoinRack cr = vendingMachine.getCoinRack(ck);
 			cr.releaseCoin();
-			funds.removeFunds(vendingMachine.getCoinKindForRack(ck));
+			FundsAvailable.getInstance().removeFunds(vendingMachine.getCoinKindForRack(ck));
 		}
 
 		return changeDue;
 	}
 
-	@Override
-	public void insufficientFunds() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void outOfStock() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void dispensed() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void hardwareFailure() {
-		// TODO Auto-generated method stub
-		
+	private void notifyInsufficientFunds(int cost) {
+		Class<?>[] parameterTypes = new Class<?>[] { BusinessLogic.class, int.class };
+		Object[] args = new Object[] { this, cost };
+		notifyListeners(ProductSelectionListener.class, "insufficientFunds", parameterTypes, args);
 	}
 
 }
