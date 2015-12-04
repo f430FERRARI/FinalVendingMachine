@@ -23,27 +23,37 @@ import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
 public class BusinessLogic extends AbstractHardware<ProductSelectionListener> implements ButtonListener {
 
+	@SuppressWarnings("unused")
 	private Vector<ProductSelectionListener> listeners = new Vector<ProductSelectionListener>();
 
 	private VendingMachine vendingMachine; 
-	private NotificationManager notificationManager;
 	
 	private Map<Button, Integer> buttonToIndex = new HashMap<>();
 	private Map<Integer, Integer> valueToIndexMap = new HashMap<>();
 
 	public BusinessLogic(VendingMachine vm) {
-		vendingMachine = vm;  
+		vendingMachine = vm;   
+		
+		// Set up funds
 		FundsAvailable.getInstance().reset();
 		FundsAvailable.getInstance().registerPaymentMethod(vm);
-		notificationManager = new NotificationManager(vendingMachine.getDisplay(), vendingMachine.getOutOfOrderLight(), vendingMachine.getExactChangeLight()); //TODO: Might wanna move this
-		register(notificationManager);
+		
+		// Set up notification manager
+		NotificationManager.getInstance().installNotificationDevices(vendingMachine.getDisplay(),  
+				vendingMachine.getOutOfOrderLight(), vendingMachine.getExactChangeLight());
+		NotificationManager.getInstance().registerBusinessLogic(this);
+		
+		// Register ProductSelectionListeners
+		register(NotificationManager.getInstance());
 
+		// Map selection buttons and register BusinessLogic as listener
 		for (int i = 0; i < vm.getNumberOfSelectionButtons(); i++) {
 			Button sb = vm.getSelectionButton(i);
 			sb.register(this);
 			buttonToIndex.put(sb, i);
 		}
 
+		// Map coin racks 
 		for (int i = 0; i < vm.getNumberOfCoinRacks(); i++) {
 			int value = vm.getCoinKindForRack(i);
 			valueToIndexMap.put(value, i);
@@ -67,7 +77,6 @@ public class BusinessLogic extends AbstractHardware<ProductSelectionListener> im
 		}
 
 		// Button is selected for product
-
 		Integer index = buttonToIndex.get(button);
 
 		if (index == null)

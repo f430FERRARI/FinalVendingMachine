@@ -4,8 +4,6 @@ import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardware;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardwareListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.CapacityExceededException;
-import ca.ucalgary.seng301.vendingmachine.hardware.CoinReceptacle;
-import ca.ucalgary.seng301.vendingmachine.hardware.CoinReceptacleListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.CoinSlot;
 import ca.ucalgary.seng301.vendingmachine.hardware.CoinSlotListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
@@ -63,20 +61,14 @@ public class CoinEntry implements CoinSlotListener, FundsInterface {
 	}  
 	
 	@Override
-	public void coinRejected(CoinSlot coinSlotSimulator, Coin coin) {
-		// TODO Auto-generated method stub
-		
+	public void coinRejected(CoinSlot coinSlotSimulator, Coin coin) {		
 	}
 
 	@Override
-	public void enabled(AbstractHardware<AbstractHardwareListener> hardware) {
-		// TODO Auto-generated method stub
-		
+	public void enabled(AbstractHardware<AbstractHardwareListener> hardware) {		
 	}
 
 	@Override
-	public void disabled(AbstractHardware<AbstractHardwareListener> hardware) {
-		// TODO Auto-generated method stub
-		
+	public void disabled(AbstractHardware<AbstractHardwareListener> hardware) {		
 	}
 }

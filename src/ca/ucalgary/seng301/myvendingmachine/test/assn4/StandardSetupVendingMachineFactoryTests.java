@@ -1,6 +1,6 @@
 package ca.ucalgary.seng301.myvendingmachine.test.assn4;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.ucalgary.seng301.myvendingmachine.BusinessLogic;
-import ca.ucalgary.seng301.myvendingmachine.FundsAvailable;
 import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;

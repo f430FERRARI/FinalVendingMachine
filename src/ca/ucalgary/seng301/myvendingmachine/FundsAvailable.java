@@ -7,6 +7,7 @@ import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardware;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
+//TODO: Should this be singleton?
 public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 
 	private static FundsAvailable instance = new FundsAvailable();
@@ -33,8 +34,10 @@ public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 		notifyFundsRemoved(amount);
 	}
 
+	// Rest FundsAvailable at start of test by resetting all variables
 	public void reset() {
-		paymentMethods.clear();
+		paymentMethods.clear(); 
+		listeners.clear();
 	}
 	
 	public void registerPaymentMethod(VendingMachine vm) {
