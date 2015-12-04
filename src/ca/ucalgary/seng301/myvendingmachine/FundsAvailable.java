@@ -13,7 +13,6 @@ public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 	
 	private ArrayList<FundsInterface> paymentMethods = new ArrayList<FundsInterface>();
 	private Vector<FundsAvailableListener> listeners = new Vector<FundsAvailableListener>();
-	//TODO: Register listeners
 	
 	private FundsAvailable() {} 
 	
@@ -34,6 +33,10 @@ public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 		notifyFundsRemoved(amount);
 	}
 
+	public void reset() {
+		paymentMethods.clear();
+	}
+	
 	public void registerPaymentMethod(VendingMachine vm) {
 		CoinEntry coinPayments = new CoinEntry(vm);
 		paymentMethods.add(coinPayments);
@@ -51,9 +54,6 @@ public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 		clearFunds();
 		notifyFundsReturned();
 	}
-	
-	public void addFunds(int amount) { 
-	} 
 
 	public void clearFunds() {
 		for (FundsInterface paymentMethod : paymentMethods) {
@@ -82,6 +82,4 @@ public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 		Object[] args = new Object[] {};
 		notifyListeners(FundsAvailableListener.class, "fundsReturned", parameterTypes, args);
 	} 
-
-
 }

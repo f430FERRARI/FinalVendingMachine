@@ -16,13 +16,14 @@ public class NotificationManager implements FundsAvailableListener, ProductSelec
 	IndicatorLight exactChangeLight;
 	
 	public NotificationManager(Display d, IndicatorLight oOL, IndicatorLight eCL) {
+		FundsAvailable.getInstance().register(this);
 		display = d; 
 		outOfOrderLight = oOL; 
 		exactChangeLight = eCL;
 	}
 
 	private void timedNotification(int ms, String oldMsg, String newMsg) {
-		display.display(newMsg); 
+		display.display(newMsg);  
 		final Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
@@ -30,7 +31,7 @@ public class NotificationManager implements FundsAvailableListener, ProductSelec
 				timer.cancel();
 			}
 		}, ms); 
-		display.display(oldMsg);
+		display.display(oldMsg); 
 	}
 	
 	@Override

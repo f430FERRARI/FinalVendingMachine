@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.ucalgary.seng301.myvendingmachine.BusinessLogic;
+import ca.ucalgary.seng301.myvendingmachine.FundsAvailable;
 import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
@@ -38,7 +39,8 @@ public class SmallSetupVendingMachineFactoryTest1 {
 		// extract()
 		// CHECK_DELIVERY(155, "stuff")
 		// unload()
-		// CHECK_TEARDOWN(320; 0)
+		// CHECK_TEARDOWN(320; 0) 
+		
 		vm.getCoinSlot().addCoin(new Coin(100));
 		vm.getCoinSlot().addCoin(new Coin(100));
 		vm.getCoinSlot().addCoin(new Coin(100));
@@ -69,7 +71,7 @@ public class SmallSetupVendingMachineFactoryTest1 {
 		// CHECK_DELIVERY(0, "stuff")
 		// unload()
 		// CHECK_TEARDOWN(1400; 135)
-
+		
 		vm.getCoinSlot().addCoin(new Coin(100));
 		vm.getCoinSlot().addCoin(new Coin(100));
 		vm.getCoinSlot().addCoin(new Coin(100));

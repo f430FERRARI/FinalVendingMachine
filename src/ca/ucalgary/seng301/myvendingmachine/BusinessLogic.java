@@ -16,7 +16,6 @@ import ca.ucalgary.seng301.vendingmachine.hardware.ButtonListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.CapacityExceededException;
 import ca.ucalgary.seng301.vendingmachine.hardware.CoinRack;
 import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
-import ca.ucalgary.seng301.vendingmachine.hardware.Display;
 import ca.ucalgary.seng301.vendingmachine.hardware.EmptyException;
 import ca.ucalgary.seng301.vendingmachine.hardware.ProductRack;
 import ca.ucalgary.seng301.vendingmachine.hardware.SimulationException;
@@ -26,16 +25,18 @@ public class BusinessLogic extends AbstractHardware<ProductSelectionListener> im
 
 	private Vector<ProductSelectionListener> listeners = new Vector<ProductSelectionListener>();
 
-	private VendingMachine vendingMachine;
+	private VendingMachine vendingMachine; 
+	private NotificationManager notificationManager;
+	
 	private Map<Button, Integer> buttonToIndex = new HashMap<>();
 	private Map<Integer, Integer> valueToIndexMap = new HashMap<>();
 
 	public BusinessLogic(VendingMachine vm) {
-		vendingMachine = vm;
+		vendingMachine = vm;  
+		FundsAvailable.getInstance().reset();
 		FundsAvailable.getInstance().registerPaymentMethod(vm);
-
-		Display display = vendingMachine.getDisplay(); // TODO: Instantiate
-														// somewhere else
+		notificationManager = new NotificationManager(vendingMachine.getDisplay(), vendingMachine.getOutOfOrderLight(), vendingMachine.getExactChangeLight()); //TODO: Might wanna move this
+		register(notificationManager);
 
 		for (int i = 0; i < vm.getNumberOfSelectionButtons(); i++) {
 			Button sb = vm.getSelectionButton(i);
@@ -169,8 +170,8 @@ public class BusinessLogic extends AbstractHardware<ProductSelectionListener> im
 	}
 
 	private void notifyInsufficientFunds(int cost) {
-		Class<?>[] parameterTypes = new Class<?>[] { BusinessLogic.class, int.class };
-		Object[] args = new Object[] { this, cost };
+		Class<?>[] parameterTypes = new Class<?>[] { int.class };
+		Object[] args = new Object[] { cost };
 		notifyListeners(ProductSelectionListener.class, "insufficientFunds", parameterTypes, args);
 	}
 

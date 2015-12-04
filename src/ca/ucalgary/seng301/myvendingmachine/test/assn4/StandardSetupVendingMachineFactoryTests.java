@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.ucalgary.seng301.myvendingmachine.BusinessLogic;
+import ca.ucalgary.seng301.myvendingmachine.FundsAvailable;
 import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
@@ -40,14 +41,14 @@ public class StandardSetupVendingMachineFactoryTests {
 		// CHECK_DELIVERY(0, "Coke")
 		// unload()
 		// CHECK_TEARDOWN(315; 0; "water", "stuff")
-
+		
 		vm.getCoinSlot().addCoin(new Coin(100));
 		vm.getCoinSlot().addCoin(new Coin(100));
 		vm.getCoinSlot().addCoin(new Coin(25));
 		vm.getCoinSlot().addCoin(new Coin(25));
-
+		
 		vm.getSelectionButton(0).press();
-
+		
 		assertEquals(Arrays.asList(0, "Coke"), Utilities.extractAndSortFromDeliveryChute(vm));
 		assertEquals(315, Utilities.extractAndSumFromCoinRacks(vm));
 		assertEquals(0, Utilities.extractAndSumFromStorageBin(vm));
@@ -101,7 +102,8 @@ public class StandardSetupVendingMachineFactoryTests {
 		// extract()
 		// CHECK_DELIVERY(0)
 		// unload()
-		// CHECK_TEARDOWN(65; 0; "Coke", "water", "stuff")
+		// CHECK_TEARDOWN(65; 0; "Coke", "water", "stuff") 
+		
 		vm.getSelectionButton(0).press();
 		assertEquals(Arrays.asList(0), Utilities.extractAndSortFromDeliveryChute(vm));
 		vm.getCoinSlot().addCoin(new Coin(100));

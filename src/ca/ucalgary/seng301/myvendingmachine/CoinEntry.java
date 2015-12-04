@@ -14,7 +14,7 @@ import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
 //MAY be missing methods, look at diagram  
 //Diagram says this class is supposed to be private 
-public class CoinEntry implements CoinSlotListener, CoinReceptacleListener, FundsInterface {
+public class CoinEntry implements CoinSlotListener, FundsInterface {
 
 	private int cashFunds;
 	private VendingMachine vendingMachine;
@@ -79,21 +79,4 @@ public class CoinEntry implements CoinSlotListener, CoinReceptacleListener, Fund
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void coinAdded(CoinReceptacle receptacle, Coin coin) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void coinsFull(CoinReceptacle receptacle) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void coinsRemoved(CoinReceptacle receptacle) {
-	}
-
 }
