@@ -34,15 +34,15 @@ public class BusinessLogic extends AbstractHardware<ProductSelectionListener> im
 	public BusinessLogic(VendingMachine vm) {
 		vendingMachine = vm;   
 		
-		// Set up funds
-		FundsAvailable.getInstance().reset();
-		FundsAvailable.getInstance().registerPaymentMethod(vm);
-		
 		// Set up notification manager
 		NotificationManager.getInstance().installNotificationDevices(vendingMachine.getDisplay(),  
 				vendingMachine.getOutOfOrderLight(), vendingMachine.getExactChangeLight());
 		NotificationManager.getInstance().registerBusinessLogic(this);
 		
+		// Set up funds
+		FundsAvailable.getInstance().reset();
+		FundsAvailable.getInstance().registerPaymentMethod(vm);
+	
 		// Register ProductSelectionListeners
 		register(NotificationManager.getInstance());
 
@@ -53,30 +53,30 @@ public class BusinessLogic extends AbstractHardware<ProductSelectionListener> im
 			buttonToIndex.put(sb, i);
 		}
 
+		// Register BusinessLogic as listener for returnButton 
+		vm.getReturnButton().register(this);
+		
 		// Map coin racks 
 		for (int i = 0; i < vm.getNumberOfCoinRacks(); i++) {
-			int value = vm.getCoinKindForRack(i);
+			int value = vm.getCoinKindForRack(i); 
 			valueToIndexMap.put(value, i);
 		}
 	}
 
 	@Override
-	public void enabled(AbstractHardware<AbstractHardwareListener> hardware) {
-	}
-
-	@Override
-	public void disabled(AbstractHardware<AbstractHardwareListener> hardware) {
-	}
-
-	@Override
 	public void pressed(Button button) {
-
-		// Return button is pressed
 		if (button == vendingMachine.getReturnButton()) {
-			FundsAvailable.getInstance().returnFunds();
+			processReturn();
+		} else { 
+			processProduct(button);
 		}
+	}
 
-		// Button is selected for product
+	private void processReturn() {
+		FundsAvailable.getInstance().returnFunds();
+	}
+
+	private void processProduct(Button button) {
 		Integer index = buttonToIndex.get(button);
 
 		if (index == null)
@@ -88,13 +88,18 @@ public class BusinessLogic extends AbstractHardware<ProductSelectionListener> im
 			ProductRack productRack = vendingMachine.getProductRack(index);
 			if (productRack.size() > 0) {
 				try {
-					productRack.dispenseProduct();
+					productRack.dispenseProduct(); 
 					vendingMachine.getCoinReceptacle().storeCoins();
-					deliverChange(cost);
+					deliverChange(cost);  
+					notifyDispensed();
+					FundsAvailable.getInstance().checkExactChange();
 				} catch (DisabledException | EmptyException | CapacityExceededException e) {
-					throw new SimulationException(e);
+					notifyHardwareFailure();
 				}
+			} else { 
+				notifyHardwareFailure();
 			}
+				
 		} else {
 			notifyInsufficientFunds(cost);
 		}
@@ -148,7 +153,7 @@ public class BusinessLogic extends AbstractHardware<ProductSelectionListener> im
 		FundsAvailable.getInstance().removeFunds(cost);
 
 		if (changeDue < 0)
-			throw new InternalError("Cost was greater than entered, which should not happen");
+			throw new InternalError("Cost was greater than entered, which should not happen");  
 
 		ArrayList<Integer> values = new ArrayList<>();
 		for (Integer ck : valueToIndexMap.keySet())
@@ -174,10 +179,29 @@ public class BusinessLogic extends AbstractHardware<ProductSelectionListener> im
 			cr.releaseCoin();
 			FundsAvailable.getInstance().removeFunds(vendingMachine.getCoinKindForRack(ck));
 		}
-
 		return changeDue;
 	}
 
+	@Override
+	public void enabled(AbstractHardware<AbstractHardwareListener> hardware) {
+	}
+
+	@Override
+	public void disabled(AbstractHardware<AbstractHardwareListener> hardware) {
+	}
+	
+	private void notifyDispensed() { 
+		Class<?>[] parameterTypes = new Class<?>[] {};
+		Object[] args = new Object[] {};
+		notifyListeners(ProductSelectionListener.class, "dispensed", parameterTypes, args);
+	}
+	
+	private void notifyHardwareFailure() {
+		Class<?>[] parameterTypes = new Class<?>[] {};
+		Object[] args = new Object[] {};
+		notifyListeners(ProductSelectionListener.class, "hardwareFailure", parameterTypes, args);
+	}
+	
 	private void notifyInsufficientFunds(int cost) {
 		Class<?>[] parameterTypes = new Class<?>[] { int.class };
 		Object[] args = new Object[] { cost };

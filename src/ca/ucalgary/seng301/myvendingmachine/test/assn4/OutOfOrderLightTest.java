@@ -1,11 +1,15 @@
 package ca.ucalgary.seng301.myvendingmachine.test.assn4;
 
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import ca.ucalgary.seng301.myvendingmachine.BusinessLogic;
+import ca.ucalgary.seng301.vendingmachine.Coin;
+import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
 public class OutOfOrderLightTest {
@@ -25,5 +29,76 @@ public class OutOfOrderLightTest {
 		Utilities.loadProducts(vm, 1, 1, 1);
 	} 
 	
+	@Test 
+	public void testDisabledCoinRack() throws DisabledException { 
+		assertEquals(false, vm.getOutOfOrderLight().isActive());
+		
+		vm.getCoinRack(3).disable(); 
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+
+		vm.getSelectionButton(0).press(); 
+		
+		assertEquals(true, vm.getOutOfOrderLight().isActive());
+	} 
+	
+	@Test 
+	public void testDisabledProductRack() throws DisabledException { 
+		assertEquals(false, vm.getOutOfOrderLight().isActive());
+
+		vm.getProductRack(0).disable();  
+		
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+
+		vm.getSelectionButton(0).press(); 
+		
+		assertEquals(true, vm.getOutOfOrderLight().isActive());
+	}
+	
+	//TODO: How about empty coin rack?
+	
+	@Test 
+	public void testInsertIntoFullCoinRack() throws DisabledException { 
+		assertEquals(false, vm.getOutOfOrderLight().isActive());
+
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100));
+
+		vm.getSelectionButton(0).press();  
+		
+		assertEquals(true, vm.getOutOfOrderLight().isActive());
+	} 
+	
+	@Test 
+	public void testEmptyProductRack() throws DisabledException { 
+		assertEquals(false, vm.getOutOfOrderLight().isActive());
+
+		Utilities.extractAndSortFromProductRacks(vm); 
+		
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(100)); 
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(10));
+		vm.getCoinSlot().addCoin(new Coin(10));
+		vm.getCoinSlot().addCoin(new Coin(25));
+
+		
+		vm.getSelectionButton(0).press();  
+		
+		assertEquals(true, vm.getOutOfOrderLight().isActive());
+	}
 	
 }

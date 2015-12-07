@@ -3,11 +3,9 @@ package ca.ucalgary.seng301.myvendingmachine;
 import java.util.ArrayList;
 import java.util.Vector;
 
-import ca.ucalgary.seng301.vendingmachine.Coin;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardware;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
-//TODO: Should this be singleton?
 public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 
 	private static FundsAvailable instance = new FundsAvailable();
@@ -34,17 +32,19 @@ public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 		notifyFundsRemoved(amount);
 	}
 
-	// Rest FundsAvailable at start of test by resetting all variables
+	// Reset FundsAvailable at start of test by resetting all variables
 	public void reset() {
 		paymentMethods.clear(); 
 		listeners.clear();
 	}
 	
+	// Used to register different payment methods
 	public void registerPaymentMethod(VendingMachine vm) {
 		CoinEntry coinPayments = new CoinEntry(vm);
 		paymentMethods.add(coinPayments);
 	}
 
+	// Get funds from all payment methods
 	public int getFunds() {
 		int availableFunds = 0;
 		for (FundsInterface paymentMethod : paymentMethods) {
@@ -53,36 +53,48 @@ public class FundsAvailable extends AbstractHardware<FundsAvailableListener> {
 		return availableFunds;
 	} 
 	
+	// Instruct all payment methods to return their funds
 	public void returnFunds() {
-		clearFunds();
+		for (FundsInterface paymentMethod : paymentMethods) {
+			paymentMethod.returnFunds(); 
+		} 
 		notifyFundsReturned();
 	}
 
+	// Instruct all payment methods to clear their funds balance
 	public void clearFunds() {
 		for (FundsInterface paymentMethod : paymentMethods) {
 			paymentMethod.clearFunds(); 
 		} 
-	} 
+	}  
 	
-	private boolean checkExactChange() {
-		return false; 
+	// Check coin racks to see if exact change is needed
+	public void checkExactChange() {
+		boolean isExactChange = paymentMethods.get(0).checkExactChange(); 
+		notifyExactChange(isExactChange);
 	}
 	
-	protected void notifyFundsAdded(int amount) {
+	void notifyFundsAdded(int amount) {
 		Class<?>[] parameterTypes = new Class<?>[] { int.class };
 		Object[] args = new Object[] { amount };
 		notifyListeners(FundsAvailableListener.class, "fundsAdded", parameterTypes, args);
 	}
 
-	protected void notifyFundsRemoved(int amount) {
+	void notifyFundsRemoved(int amount) {
 		Class<?>[] parameterTypes = new Class<?>[] { int.class };
 		Object[] args = new Object[] { amount };
 		notifyListeners(FundsAvailableListener.class, "fundsRemoved", parameterTypes, args);
 	}
 
-	protected void notifyFundsReturned() {
-		Class<?>[] parameterTypes = new Class<?>[] { FundsAvailable.class, Coin.class };
+	void notifyFundsReturned() {
+		Class<?>[] parameterTypes = new Class<?>[] {};
 		Object[] args = new Object[] {};
 		notifyListeners(FundsAvailableListener.class, "fundsReturned", parameterTypes, args);
+	} 
+	
+	void notifyExactChange(boolean isExact) { 
+		Class<?>[] parameterTypes = new Class<?>[] { boolean.class };
+		Object[] args = new Object[] { isExact };
+		notifyListeners(FundsAvailableListener.class, "exactChange", parameterTypes, args);
 	} 
 }

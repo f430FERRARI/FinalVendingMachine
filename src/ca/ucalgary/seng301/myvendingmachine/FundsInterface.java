@@ -9,6 +9,8 @@ public interface FundsInterface {
 	
 	public void removeFunds(int amount); 
 	
-	public void clearFunds(); 
+	public void clearFunds();  
+	
+	public boolean checkExactChange();
 	
 }

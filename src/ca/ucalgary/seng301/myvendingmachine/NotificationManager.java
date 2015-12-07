@@ -1,22 +1,20 @@
 package ca.ucalgary.seng301.myvendingmachine;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.sun.org.apache.xpath.internal.functions.FuncUnparsedEntityURI;
-
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardware;
 import ca.ucalgary.seng301.vendingmachine.hardware.AbstractHardwareListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.Display;
+import ca.ucalgary.seng301.vendingmachine.hardware.DisplayListener;
 import ca.ucalgary.seng301.vendingmachine.hardware.IndicatorLight;
+import ca.ucalgary.seng301.vendingmachine.hardware.SimulationException;
 
-public class NotificationManager implements FundsAvailableListener, ProductSelectionListener {
+public class NotificationManager implements FundsAvailableListener, ProductSelectionListener, DisplayListener {
 
 	private static NotificationManager instance = new NotificationManager();
 
 	private Display display;
 	private IndicatorLight outOfOrderLight;
-	private IndicatorLight exactChangeLight;
+	private IndicatorLight exactChangeLight; 
+	private String lastMsg;
 
 	private NotificationManager() {
 		FundsAvailable.getInstance().register(this);
@@ -25,12 +23,14 @@ public class NotificationManager implements FundsAvailableListener, ProductSelec
 	public void installNotificationDevices(Display d, IndicatorLight oOL, IndicatorLight eCL) {
 		outOfOrderLight = oOL;
 		exactChangeLight = eCL;
-		display = d;
+		display = d; 
 
+		display.register(this); 
+		
+		//Set default display message
 		display.display("Drink Pop!");
 	}
 
-	// TODO: Seems weird
 	public void registerBusinessLogic(BusinessLogic bl) {
 		bl.register(this);
 	}
@@ -48,8 +48,7 @@ public class NotificationManager implements FundsAvailableListener, ProductSelec
 	public void fundsRemoved(int amount) {
 		if (FundsAvailable.getInstance().getFunds() == 0) { 
 			String msg = "Total: "+ FundsAvailable.getInstance().getFunds() + " units";
-			timedNotification(1000, msg); // TODO: Watch execution of these timings
-			timedNotification(2000, "No funds!"); 
+			timedNotification(400, msg);
 			display.display("Drink Pop!");
 		} else {
 		display.display("Total: " + FundsAvailable.getInstance().getFunds() + " units"); 
@@ -63,9 +62,6 @@ public class NotificationManager implements FundsAvailableListener, ProductSelec
 		display.display("Drink Pop!");
 	}
 
-	// Activate out of order light
-	// Notify IndicatorLightListeners that it has been activated
-	// TODO: Deactivate this light
 	@Override
 	public void hardwareFailure() {
 		outOfOrderLight.activate();
@@ -75,47 +71,48 @@ public class NotificationManager implements FundsAvailableListener, ProductSelec
 	public void insufficientFunds(int cost) {
 		String oldMsg = display.read();
 		String newMsg = "Cost is " + cost;
-		timedNotification(5000, newMsg);
+		timedNotification(2000, newMsg);
 		display.display(oldMsg);
 	}
 
 	@Override
 	public void dispensed() {
 		timedNotification(5000, "Pop and change Dispensed");
-		display.display("Drink Pop!");
+		display.display("Drink Pop!"); 
 	}
 	
-	// TODO: Deactivate this light
 	@Override
-	public void exactChange() {
-		exactChangeLight.activate();
+	public void exactChange(boolean isExact) {
+		if (isExact) {
+			exactChangeLight.activate();  
+		} else { 
+			exactChangeLight.deactivate();
+		}
 	}
 
 	private void timedNotification(int ms, String newMsg) {
-		display.display(newMsg);
-		final Timer timer = new Timer();
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				timer.cancel();
-			}
-		}, ms);
+		display.display(newMsg); 
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			throw new SimulationException(e);
+		}
 	}
 
 	@Override
-	public void outOfStock() {
-	}
-
+	public void messageChange(Display display, String oldMsg, String newMsg) {
+		lastMsg = oldMsg;
+	} 
+	
+	public String getLastDisplayMsg() {
+		return lastMsg;
+	} 
+	
 	@Override
 	public void enabled(AbstractHardware<AbstractHardwareListener> hardware) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void disabled(AbstractHardware<AbstractHardwareListener> hardware) {
-		// TODO Auto-generated method stub
-
 	}
-
 }

@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.ucalgary.seng301.myvendingmachine.BusinessLogic;
+import ca.ucalgary.seng301.vendingmachine.Coin;
+import ca.ucalgary.seng301.vendingmachine.hardware.DisabledException;
 import ca.ucalgary.seng301.vendingmachine.hardware.VendingMachine;
 
 public class ReturnButtonTest {
@@ -24,21 +26,78 @@ public class ReturnButtonTest {
 		vm.configure(Arrays.asList(new String[] { "Coke", "water", "stuff" }),
 				Arrays.asList(new Integer[] { 250, 250, 205 }));
 		Utilities.loadCoins(vm, 1, 1, 2, 0);
-		Utilities.loadProducts(vm, 1, 1, 1); 
-	} 
-	
-	@Test 
-	public void testT20NoCoinsInsertedAndReturn() { 
+		Utilities.loadProducts(vm, 1, 1, 1);
+	}
+
+	@Test
+	public void testT20NoCoinsInsertedAndReturn() {
+		// press(return)
+		// extract()
+		// CHECK_DELIVERY(0)
+		// unload()
+		// CHECK_TEARDOWN(65; 0; "Coke", "water", "stuff")
+		vm.getReturnButton().press();
+		assertEquals(Arrays.asList(0), Utilities.extractAndSortFromDeliveryChute(vm));
+		assertEquals(65, Utilities.extractAndSumFromCoinRacks(vm));
+		assertEquals(0, Utilities.extractAndSumFromStorageBin(vm));
+		assertEquals(Arrays.asList("Coke", "stuff", "water"), Utilities.extractAndSortFromProductRacks(vm));
+	}
+
+	@Test
+	public void testInsertScrambledCoinKindsAndReturn() throws DisabledException {
+		// extract()
+		// CHECK_DELIVERY(0)
+		// insert(100)
+		// insert(5)
+		// insert(25) 
+		// press(return)
+		// extract()
+		// CHECK_DELIVERY(0)
+		// unload()
+		// CHECK_TEARDOWN(65; 0; "Coke", "water", "stuff")
+
+		assertEquals(Arrays.asList(0), Utilities.extractAndSortFromDeliveryChute(vm));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(5));
+		vm.getCoinSlot().addCoin(new Coin(25)); 
+		vm.getReturnButton().press();
+
+		assertEquals(Arrays.asList(130), Utilities.extractAndSortFromDeliveryChute(vm));
+		assertEquals(65, Utilities.extractAndSumFromCoinRacks(vm));
+		assertEquals(0, Utilities.extractAndSumFromStorageBin(vm));
+		assertEquals(Arrays.asList("Coke", "stuff", "water"), Utilities.extractAndSortFromProductRacks(vm));
+	}
+	@Test
+	public void testInsertScrambledCoinKindsAndReturnTwice() throws DisabledException {
+		// extract()
+		// CHECK_DELIVERY(0)
+		// insert(100)
+		// insert(5)
+		// insert(25) 
+		// press(return)
+		// extract()
+		// CHECK_DELIVERY(0)
+		// unload()
+		// CHECK_TEARDOWN(65; 0; "Coke", "water", "stuff")
+
+		assertEquals(Arrays.asList(0), Utilities.extractAndSortFromDeliveryChute(vm));
+		vm.getCoinSlot().addCoin(new Coin(100));
+		vm.getCoinSlot().addCoin(new Coin(5));
+		vm.getCoinSlot().addCoin(new Coin(25)); 
+		vm.getReturnButton().press();
+
+		assertEquals(Arrays.asList(130), Utilities.extractAndSortFromDeliveryChute(vm));
+		assertEquals(65, Utilities.extractAndSumFromCoinRacks(vm));
+		assertEquals(0, Utilities.extractAndSumFromStorageBin(vm));
+		assertEquals(Arrays.asList("Coke", "stuff", "water"), Utilities.extractAndSortFromProductRacks(vm)); 
 		
-	} 
-	
-	@Test 
-	public void testInsertScrambledCoinKindsAndReturn() { 
-		
-	} 
-	
-	@Test 
-	public void testOverloadCoinReceptableAndReturn() { 
+		vm.getReturnButton().press(); 
+
+		assertEquals(Arrays.asList(0), Utilities.extractAndSortFromDeliveryChute(vm));
+		assertEquals(0, Utilities.extractAndSumFromCoinRacks(vm));
+		assertEquals(0, Utilities.extractAndSumFromStorageBin(vm));
+		assertEquals(Arrays.asList(), Utilities.extractAndSortFromProductRacks(vm)); 
 		
 	}
+	
 }

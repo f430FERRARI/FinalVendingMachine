@@ -10,6 +10,6 @@ import org.junit.runners.Suite.SuiteClasses;
 		ScrambledCoinKindsVendingMachineFactoryTests2.class, SmallSetupVendingMachineFactoryTest1.class,
 		SmallSetupVendingMachineFactoryTest2.class, SmallSetupVendingMachineFactoryTest3.class,
 		StandardSetupVendingMachineFactoryTests.class })
-public class AllTests {
+public class AllTestsFromAssn3 {
 
 }

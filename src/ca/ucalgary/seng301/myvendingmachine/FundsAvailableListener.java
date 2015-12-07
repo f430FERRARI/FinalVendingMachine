@@ -12,5 +12,5 @@ public interface FundsAvailableListener extends AbstractHardwareListener{
 	
 	public void hardwareFailure();
 
-	public void exactChange();
+	public void exactChange(boolean isExact);
 }

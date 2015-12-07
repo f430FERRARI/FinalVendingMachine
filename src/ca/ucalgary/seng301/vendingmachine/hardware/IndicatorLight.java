@@ -19,7 +19,7 @@ public final class IndicatorLight extends
     /**
      * Turns the light on. Announces an "activated" event to its listeners.
      */
-    public void activate() {
+    public void activate() { 
 	on = true;
 
 	notifyActivated();
@@ -37,7 +37,7 @@ public final class IndicatorLight extends
     /**
      * Returns whether the light is currently on (active). Causes no events.
      */
-    public boolean isActive() {
+    public boolean isActive() { 
 	return on;
     }
 
